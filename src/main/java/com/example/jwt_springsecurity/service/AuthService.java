@@ -7,6 +7,8 @@ import com.example.jwt_springsecurity.dto.MemberRequestDto;
 import com.example.jwt_springsecurity.dto.MemberResponseDto;
 import com.example.jwt_springsecurity.dto.TokenDto;
 import com.example.jwt_springsecurity.dto.TokenRequestDto;
+import com.example.jwt_springsecurity.exception.CustomException;
+import com.example.jwt_springsecurity.exception.ErrorCode;
 import com.example.jwt_springsecurity.repository.MemberRepository;
 import com.example.jwt_springsecurity.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +31,7 @@ public class AuthService {
     @Transactional
     public MemberResponseDto signup(MemberRequestDto memberRequestDto) {
         if (memberRepository.existsByEmail(memberRequestDto.getEmail())) {
-            throw new RuntimeException("이미 가입되어 있는 유저입니다");
+            throw new CustomException(ErrorCode.DUPLICATE_USER_ID);
         }
 
         Member member = memberRequestDto.toMember(passwordEncoder);

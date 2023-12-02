@@ -1,43 +1,26 @@
-version: '3'
+version: '3.8'
 
 services:
   database:
-    container_name: mysql_db
-    image: mysql/mysql-server:5.7
-    restart: unless-stopped
-    platform: linux/amd64
+    image: mysql
+    container_name: gdsc
     environment:
-      MYSQL_ROOT_HOST: '%'
-      MYSQL_DATABASE: study
-      MYSQL_ROOT_PASSWORD: 924498
-      TZ: 'Asia/Seoul'
+      - MYSQL_DATABASE=springboot
+      - MYSQL_ROOT_PASSWORD=924498
+      - TZ= Asia/Seoul
     ports:
-      - "3307:3306"
-    volumes:
-      - ./mysql/conf.d:/etc/mysql/conf.d # MySQL 설정 파일 위치
-    command:
-      - "mysqld"
-      - "--character-set-server=utf8mb4"
-      - "--collation-server=utf8mb4_unicode_ci"
-    networks:
-      - test_network
+      - '3307:3306'
 
-  application:
-    container_name: springboot
+
+  backend:
+    image: gdsc
     restart: on-failure
-    build:
-      context: ""
-      dockerfile: Dockerfile
     ports:
-      - "8080:8080"
+      - '8080:8080'
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql_db:3306/study?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-      SPRING_DATASOURCE_USERNAME: "root"
-      SPRING_DATASOURCE_PASSWORD: 924498
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:mysql://gdsc:3306/springboot?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=924498
     depends_on:
       - database
-    networks:
-      - test_network
-
-networks:
-  test_network:
