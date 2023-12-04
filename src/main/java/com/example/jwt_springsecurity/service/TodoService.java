@@ -6,9 +6,10 @@ import com.example.jwt_springsecurity.domain.Todo;
 import com.example.jwt_springsecurity.dto.PageResponseDto;
 import com.example.jwt_springsecurity.dto.TodoDto;
 import com.example.jwt_springsecurity.dto.TodoListDto;
+import com.example.jwt_springsecurity.exception.CustomException;
+import com.example.jwt_springsecurity.exception.ErrorCode;
 import com.example.jwt_springsecurity.repository.MemberRepository;
 import com.example.jwt_springsecurity.repository.TodoRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -52,7 +54,7 @@ public class TodoService {
         Member member = getMember(authentication);
 
         if (member.getTodoList().isEmpty()) {
-            throw new EntityNotFoundException("TODO가 없습니다.");
+            throw new CustomException(ErrorCode.TODO_NOT_FOUND);
         }
 
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
@@ -79,14 +81,13 @@ public class TodoService {
     }
 
 
-
     @Transactional(readOnly = true)
     public TodoListDto findTodoById(Long id, Authentication authentication) {
 
         Member member = getMember(authentication);
 
         Todo todo = todoRepository.findByIdAndMember(id, member)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ErrorCode.TODO_NOT_FOUND));
 
         return TodoListDto.builder()
                 .title(todo.getTitle())
@@ -100,7 +101,7 @@ public class TodoService {
         Member member = getMember(authentication);
 
         Todo todo = todoRepository.findByIdAndMember(id, member)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ErrorCode.TODO_NOT_FOUND));
 
         todo.setTitle(todoDto.getTitle());
 
@@ -115,7 +116,7 @@ public class TodoService {
         Member member = getMember(authentication);
 
         Todo todo = todoRepository.findByIdAndMember(id, member)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ErrorCode.TODO_NOT_FOUND));
 
         todoRepository.delete(todo);
     }
@@ -126,7 +127,7 @@ public class TodoService {
         Member member = getMember(authentication);
 
         Todo todo = todoRepository.findByIdAndMember(id, member)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(() -> new CustomException(ErrorCode.TODO_NOT_FOUND));
 
         todo.setCompleted(true);
 
@@ -138,7 +139,8 @@ public class TodoService {
 
     private Member getMember(Authentication authentication) {
         String email = authentication.getName();
-        return memberRepository.findById(Long.valueOf(email)).orElseThrow(EntityNotFoundException::new);
+        return memberRepository.findByEmail(email)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
     }
 
 }

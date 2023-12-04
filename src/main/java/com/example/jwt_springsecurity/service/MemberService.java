@@ -3,6 +3,8 @@ package com.example.jwt_springsecurity.service;
 import com.example.jwt_springsecurity.config.SecurityUtil;
 import com.example.jwt_springsecurity.domain.Member;
 import com.example.jwt_springsecurity.dto.MemberResponseDto;
+import com.example.jwt_springsecurity.exception.CustomException;
+import com.example.jwt_springsecurity.exception.ErrorCode;
 import com.example.jwt_springsecurity.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,7 +20,7 @@ public class MemberService {
 
     public MemberResponseDto findMemberInfoById(Long memberId) {
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new RuntimeException("유저 정보가 일치하지 않습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
         return MemberResponseDto.of(member);
     }
@@ -26,14 +28,14 @@ public class MemberService {
     public MemberResponseDto findMemberInfoByEmail(String email) {
 
         Member member = memberRepository.findById(SecurityUtil.getCurrentMemberId())
-                .orElseThrow(() -> new RuntimeException("로그인 유저 정보가 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
         if (!Objects.equals(member.getEmail(), email)) {
-            throw new RuntimeException("권한이 존재하지 않습니다.");
+            throw new CustomException(ErrorCode.NO_PERMISSION);
         }
 
         Member DBmember = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("유저 정보가 일치하지 않습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
         return MemberResponseDto.of(DBmember);
     }
