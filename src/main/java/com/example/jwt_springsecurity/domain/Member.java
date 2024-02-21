@@ -1,36 +1,64 @@
 package com.example.jwt_springsecurity.domain;
 
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
-@NoArgsConstructor
+@AllArgsConstructor
+@RequiredArgsConstructor
+@Builder
 @Entity
-public class Member {
-
+public class Member implements UserDetails {
     @Id
-    @Column(name = "member_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "member_id")
     private Long id;
 
-    private String email;
+    @Column(nullable = false)
+    private String username;
 
+    @Column(nullable = false)
     private String password;
 
-    @Enumerated(EnumType.STRING)
-    private Authority authority;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Builder.Default
+    private List<String> roles = new ArrayList<>();
 
     @OneToMany(mappedBy = "member")
     private List<Todo> todoList;
 
-    @Builder
-    public Member(String email, String password, Authority authority) {
-        this.email = email;
-        this.password = password;
-        this.authority = authority;
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return this.roles.stream()
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }

@@ -12,9 +12,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class TodoListDto {
 
-    @NotBlank
+    private Long id;
+
     private String title;
 
-    @NotBlank
     private Boolean completed;
 }

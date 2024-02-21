@@ -25,16 +25,16 @@ public class MemberService {
         return MemberResponseDto.of(member);
     }
 
-    public MemberResponseDto findMemberInfoByEmail(String email) {
+    public MemberResponseDto findMemberInfoByUsername(String username) {
 
         Member member = memberRepository.findById(SecurityUtil.getCurrentMemberId())
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
-        if (!Objects.equals(member.getEmail(), email)) {
+        if (!Objects.equals(member.getUsername(), username)) {
             throw new CustomException(ErrorCode.NO_PERMISSION);
         }
 
-        Member DBmember = memberRepository.findByEmail(email)
+        Member DBmember = memberRepository.findByUsername(username)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
         return MemberResponseDto.of(DBmember);

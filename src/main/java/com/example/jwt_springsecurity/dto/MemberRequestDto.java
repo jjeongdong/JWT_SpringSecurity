@@ -1,12 +1,13 @@
 package com.example.jwt_springsecurity.dto;
 
 
-import com.example.jwt_springsecurity.domain.Authority;
 import com.example.jwt_springsecurity.domain.Member;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.Collections;
 
 @Getter
 @AllArgsConstructor
@@ -14,20 +15,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class MemberRequestDto {
 
     @NotBlank
-    private String email;
+    private String username;
 
     @NotBlank
     private String password;
 
     public Member toMember(PasswordEncoder passwordEncoder) {
         return Member.builder()
-                .email(email)
+                .username(username)
                 .password(passwordEncoder.encode(password))
-                .authority(Authority.ROLE_USER)
+                .roles(Collections.singletonList("ROLE_USER"))
                 .build();
-    }
-
-    public UsernamePasswordAuthenticationToken toAuthentication() {
-        return new UsernamePasswordAuthenticationToken(email, password);
     }
 }

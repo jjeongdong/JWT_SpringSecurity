@@ -16,14 +16,13 @@ public class Todo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne
+    @JoinColumn(name = "member_id")
+    private Member member;
+
     @Column(nullable = false)
     private String title;
 
     @Column(nullable = false)
     private Boolean completed;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;
-
 }

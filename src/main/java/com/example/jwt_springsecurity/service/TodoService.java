@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.example.jwt_springsecurity.config.SecurityUtil.getCurrentMemberId;
+
 
 @Service
 @RequiredArgsConstructor
@@ -34,9 +36,11 @@ public class TodoService {
 
 
     @Transactional
-    public TodoDto createTodo(TodoDto todoDto, Authentication authentication) {
+    public TodoDto createTodo(TodoDto todoDto) {
 
-        Member member = getMember(authentication);
+        Long memberId = getCurrentMemberId();
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.TODO_NOT_FOUND));
 
         Todo todo = Todo.builder()
                 .title(todoDto.getTitle())
@@ -49,9 +53,11 @@ public class TodoService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponseDto findAll(int pageNo, int pageSize, String sortBy, Authentication authentication) {
+    public PageResponseDto findAll(int pageNo, int pageSize, String sortBy) {
 
-        Member member = getMember(authentication);
+        Long memberId = getCurrentMemberId();
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.TODO_NOT_FOUND));
 
         if (member.getTodoList().isEmpty()) {
             throw new CustomException(ErrorCode.TODO_NOT_FOUND);
@@ -64,6 +70,7 @@ public class TodoService {
 
         List<TodoListDto> content = todoList.stream()
                 .map(todo -> TodoListDto.builder()
+                        .id(todo.getId())
                         .title(todo.getTitle())
                         .completed(todo.getCompleted())
                         .build())
@@ -82,23 +89,28 @@ public class TodoService {
 
 
     @Transactional(readOnly = true)
-    public TodoListDto findTodoById(Long id, Authentication authentication) {
+    public TodoListDto findTodoById(Long id) {
 
-        Member member = getMember(authentication);
+        Long memberId = getCurrentMemberId();
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.TODO_NOT_FOUND));
 
         Todo todo = todoRepository.findByIdAndMember(id, member)
                 .orElseThrow(() -> new CustomException(ErrorCode.TODO_NOT_FOUND));
 
         return TodoListDto.builder()
+                .id(todo.getId())
                 .title(todo.getTitle())
                 .completed(todo.getCompleted())
                 .build();
     }
 
     @Transactional
-    public TodoDto updateTodoById(Long id, TodoDto todoDto, Authentication authentication) {
+    public TodoDto updateTodoById(Long id, TodoDto todoDto) {
 
-        Member member = getMember(authentication);
+        Long memberId = getCurrentMemberId();
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.TODO_NOT_FOUND));
 
         Todo todo = todoRepository.findByIdAndMember(id, member)
                 .orElseThrow(() -> new CustomException(ErrorCode.TODO_NOT_FOUND));
@@ -111,9 +123,11 @@ public class TodoService {
     }
 
     @Transactional
-    public void deleteTodoById(Long id, Authentication authentication) {
+    public void deleteTodoById(Long id) {
 
-        Member member = getMember(authentication);
+        Long memberId = getCurrentMemberId();
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.TODO_NOT_FOUND));
 
         Todo todo = todoRepository.findByIdAndMember(id, member)
                 .orElseThrow(() -> new CustomException(ErrorCode.TODO_NOT_FOUND));
@@ -122,9 +136,11 @@ public class TodoService {
     }
 
     @Transactional
-    public TodoListDto complete(Long id, Authentication authentication) {
+    public TodoListDto complete(Long id) {
 
-        Member member = getMember(authentication);
+        Long memberId = getCurrentMemberId();
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.TODO_NOT_FOUND));
 
         Todo todo = todoRepository.findByIdAndMember(id, member)
                 .orElseThrow(() -> new CustomException(ErrorCode.TODO_NOT_FOUND));
@@ -132,15 +148,9 @@ public class TodoService {
         todo.setCompleted(true);
 
         return TodoListDto.builder()
+                .id(todo.getId())
                 .title(todo.getTitle())
                 .completed(todo.getCompleted())
                 .build();
     }
-
-    private Member getMember(Authentication authentication) {
-        String email = authentication.getName();
-        return memberRepository.findByEmail(email)
-                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
-    }
-
 }
