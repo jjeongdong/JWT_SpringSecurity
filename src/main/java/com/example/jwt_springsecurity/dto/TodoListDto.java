@@ -1,6 +1,5 @@
 package com.example.jwt_springsecurity.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

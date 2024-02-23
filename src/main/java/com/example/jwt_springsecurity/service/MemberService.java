@@ -18,6 +18,7 @@ import java.util.Objects;
 public class MemberService {
     private final MemberRepository memberRepository;
 
+    @Transactional(readOnly = true)
     public MemberResponseDto findMemberInfoById(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
@@ -25,8 +26,8 @@ public class MemberService {
         return MemberResponseDto.of(member);
     }
 
+    @Transactional(readOnly = true)
     public MemberResponseDto findMemberInfoByUsername(String username) {
-
         Member member = memberRepository.findById(SecurityUtil.getCurrentMemberId())
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 

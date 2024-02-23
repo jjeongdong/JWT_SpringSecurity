@@ -1,7 +1,6 @@
 package com.example.jwt_springsecurity.config;
 
 import com.example.jwt_springsecurity.dto.TokenDto;
-import com.example.jwt_springsecurity.exception.CustomException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
