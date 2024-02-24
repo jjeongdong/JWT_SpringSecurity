@@ -1,9 +1,6 @@
 package com.example.jwt_springsecurity.controller;
 
-import com.example.jwt_springsecurity.dto.MemberRequestDto;
-import com.example.jwt_springsecurity.dto.MemberResponseDto;
-import com.example.jwt_springsecurity.dto.TokenDto;
-import com.example.jwt_springsecurity.dto.TokenRequestDto;
+import com.example.jwt_springsecurity.dto.*;
 import com.example.jwt_springsecurity.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +27,7 @@ public class AuthController {
     }
 
     @PostMapping("/reissue")
-    public ResponseEntity<TokenDto> reissue(@RequestBody @Valid TokenRequestDto tokenRequestDto) {
-        return ResponseEntity.ok(authService.reissue(tokenRequestDto));
+    public ResponseEntity<TokenDto> reissue(@RequestBody @Valid RefreshTokenDto refreshTokenDto) {
+        return ResponseEntity.ok(authService.reissue(refreshTokenDto));
     }
 }

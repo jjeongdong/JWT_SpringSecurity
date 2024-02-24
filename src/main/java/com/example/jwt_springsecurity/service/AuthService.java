@@ -3,14 +3,12 @@ package com.example.jwt_springsecurity.service;
 import com.example.jwt_springsecurity.config.TokenProvider;
 import com.example.jwt_springsecurity.domain.Member;
 import com.example.jwt_springsecurity.domain.RefreshToken;
-import com.example.jwt_springsecurity.dto.MemberRequestDto;
-import com.example.jwt_springsecurity.dto.MemberResponseDto;
-import com.example.jwt_springsecurity.dto.TokenDto;
-import com.example.jwt_springsecurity.dto.TokenRequestDto;
+import com.example.jwt_springsecurity.dto.*;
 import com.example.jwt_springsecurity.exception.CustomException;
 import com.example.jwt_springsecurity.exception.ErrorCode;
 import com.example.jwt_springsecurity.repository.MemberRepository;
 import com.example.jwt_springsecurity.repository.RefreshTokenRepository;
+import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -62,32 +60,17 @@ public class AuthService {
     }
 
     @Transactional
-    public TokenDto reissue(TokenRequestDto tokenRequestDto) {
-        // 1. Refresh Token 검증
-        if (!tokenProvider.validateToken(tokenRequestDto.getRefreshToken())) {
-            throw new RuntimeException("Refresh Token 이 유효하지 않습니다.");
-        }
-
-        // 2. Access Token 에서 Member ID 가져오기
-        Authentication authentication = tokenProvider.getAuthentication(tokenRequestDto.getAccessToken());
-
-        // 3. 저장소에서 Member ID 를 기반으로 Refresh Token 값 가져옴
-        RefreshToken refreshToken = refreshTokenRepository.findById(Long.valueOf(authentication.getName()))
+    public TokenDto reissue(RefreshTokenDto refreshTokenDto) {
+        RefreshToken refreshToken = refreshTokenRepository.findByValue(refreshTokenDto.getRefreshToken())
                 .orElseThrow(() -> new CustomException(ErrorCode.TOKEN_NOT_FOUND));
 
-        // 4. Refresh Token 일치하는지 검사
-        if (!refreshToken.getValue().equals(tokenRequestDto.getRefreshToken())) {
-            throw new CustomException(ErrorCode.INVALID_TOKEN);
-        }
+        Authentication authentication = tokenProvider.getAuthentication(refreshToken.getValue());
 
-        // 5. 새로운 토큰 생성
-        TokenDto tokenDto = tokenProvider.generateTokenDto(authentication);
+        String accessToken = tokenProvider.generateAccessToken(authentication);
 
-        // 6. 저장소 정보 업데이트
-        RefreshToken newRefreshToken = refreshToken.updateValue(tokenDto.getRefreshToken());
-        refreshTokenRepository.save(newRefreshToken);
-
-        // 토큰 발급
-        return tokenDto;
+        return TokenDto.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshTokenDto.getRefreshToken())
+                .build();
     }
 }
