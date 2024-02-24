@@ -5,7 +5,7 @@ import lombok.Data;
 
 
 @Data
-public class RefreshTokenDto {
+public class RequestTokenDto {
     @NotEmpty
     String refreshToken;
 }
