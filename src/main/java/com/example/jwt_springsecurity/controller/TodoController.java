@@ -18,6 +18,15 @@ public class TodoController {
 
     private final TodoService todoService;
 
+    @GetMapping("/mylist")
+    public PageResponseDto myList(
+            @RequestParam(value = "pageNo", defaultValue = "0", required = false) Integer pageNo,
+            @RequestParam(value = "pageSize", defaultValue = "5", required = false) Integer pageSize,
+            @RequestParam(value = "sortBy", defaultValue = "id", required = false) String sortBy
+    ) {
+        return todoService.findMyTODO(pageNo, pageSize, sortBy);
+    }
+
     @GetMapping("/list")
     public PageResponseDto list(
             @RequestParam(value = "pageNo", defaultValue = "0", required = false) Integer pageNo,

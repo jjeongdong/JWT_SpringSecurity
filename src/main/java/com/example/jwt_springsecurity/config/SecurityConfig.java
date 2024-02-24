@@ -44,7 +44,7 @@ public class SecurityConfig {
         // 경로별 인가 작업
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/auth/**", "/todo/list").permitAll()
                         .anyRequest().authenticated());
 
         // 사용자 이름 및 비밀번호 인증 필터 전에 JWT를 처리하는 JwtFilter를 등록

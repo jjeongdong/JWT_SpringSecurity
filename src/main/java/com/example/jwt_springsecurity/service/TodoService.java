@@ -51,7 +51,7 @@ public class TodoService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponseDto findAll(int pageNo, int pageSize, String sortBy) {
+    public PageResponseDto findMyTODO(int pageNo, int pageSize, String sortBy) {
 
         Long memberId = getCurrentMemberId();
         Member member = memberRepository.findById(memberId)
@@ -85,6 +85,32 @@ public class TodoService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
+    public PageResponseDto findAll(int pageNo, int pageSize, String sortBy) {
+
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).descending());
+        Page<Todo> todoPage = todoRepository.findAll(pageable);
+
+        List<Todo> todoList = todoPage.getContent();
+
+        List<TodoListDto> content = todoList.stream()
+                .map(todo -> TodoListDto.builder()
+                        .id(todo.getId())
+                        .title(todo.getTitle())
+                        .completed(todo.getCompleted())
+                        .build())
+                .collect(Collectors.toList());
+
+
+        return PageResponseDto.builder()
+                .content(content)
+                .pageNo(pageNo)
+                .pageSize(pageSize)
+                .totalElements(todoPage.getTotalElements())
+                .totalPages(todoPage.getTotalPages())
+                .last(todoPage.isLast())
+                .build();
+    }
 
     @Transactional(readOnly = true)
     public TodoListDto findTodoById(Long id) {
