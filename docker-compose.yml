@@ -1,15 +1,12 @@
-version: '3'
-
+version: "3"
 services:
-  database:
+  mysql:
     container_name: mysql_db
-    image: mysql/mysql-server:5.7
-    restart: unless-stopped
+    image: mysql
     environment:
       MYSQL_ROOT_HOST: '%'
       MYSQL_DATABASE: study
       MYSQL_ROOT_PASSWORD: 924498
-      TZ: 'Asia/Seoul'
     ports:
       - "3306:3306"
     volumes:
@@ -21,18 +18,29 @@ services:
     networks:
       - test_network
 
-  application:
-    container_name: springboot
+  redis:
+    container_name: redis_db
+    image: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - test_network
+
+  springbootapp:
     restart: on-failure
-    build:
-      context: ""
-      dockerfile: Dockerfile
+    build: .
     ports:
       - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql_db:3306/study?useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: "root"
+      SPRING_DATASOURCE_PASSWORD: "924498"
     depends_on:
-      - database
+      - mysql
+      - redis
     networks:
       - test_network
 
 networks:
   test_network:
+
