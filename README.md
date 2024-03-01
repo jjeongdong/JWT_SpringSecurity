@@ -11,7 +11,8 @@
 
 
 ## ERD
-![ERD drawio](https://github.com/jjeongdong/JWT_SpringSecurity/assets/112836685/74df122b-e814-49d4-b754-a82e92d83f5b)
+![image](https://github.com/jjeongdong/JWT_SpringSecurity/assets/112836685/bdac614a-f0a3-47fd-9149-d69bd44b47e0)
+
 
 
 ## Blog
